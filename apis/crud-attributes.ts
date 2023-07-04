@@ -6,7 +6,7 @@ import { tables } from "../common/common";
 * API Function for Create Attributes
 @param req: request from client side
 @param res: res which will recieve on client side
-@param next: if I need to go throw any kind of function after processing business logic.
+
 */
 
 const createAttributesApi = async (req: Request, res: Response) => {
@@ -34,7 +34,7 @@ const createAttributesApi = async (req: Request, res: Response) => {
 * API Function for Read Attributes
 @param req: request from client side
 @param res: res which will recieve on client side
-@param next: if I need to go throw any kind of function after processing business logic.
+
 */
 
 const readAttributesApi = async (req: Request, res: Response) => {
@@ -59,7 +59,7 @@ const readAttributesApi = async (req: Request, res: Response) => {
 * API Function for Update Attributes
 @param req: request from client side
 @param res: res which will recieve on client side
-@param next: if I need to go throw any kind of function after processing business logic.
+
 */
 
 const updateAttributesApi = async (req: Request, res: Response) => {
@@ -95,7 +95,7 @@ const updateAttributesApi = async (req: Request, res: Response) => {
 * API Function for Delete Attributes
 @param req: request from client side
 @param res: res which will recieve on client side
-@param next: if I need to go throw any kind of function after processing business logic.
+
 */
 
 const deleteAttributesApi = async (req: Request, res: Response) => {
@@ -109,7 +109,7 @@ const deleteAttributesApi = async (req: Request, res: Response) => {
         }
         let updateAttributes = await knex(tables.attributes).where(attribute_id, id).update({ [attribute_id]: null })
         if (updateAttributes) {
-            let response = await knex(tableName)
+            await knex(tableName)
                 .where('id', id)
                 .del()
         }

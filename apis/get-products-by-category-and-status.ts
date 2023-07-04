@@ -3,10 +3,10 @@ import knex from "../config/connectToDatabase";
 import { processProducts, tables } from "../common/common";
 
 /**
-* API Function for SEARCH properties from db
-@param req: request from client side
-@param res: res which will recieve on client side
-@param next: if I need to go throw any kind of function after processing business logic.
+*  Function for get all category ids related child category from db
+@param categoryIds: where we store all categories
+@param categoryId: id which will query for parent_id
+
 */
 const getCategoryId = async (categoryIds: any, categoryId: any): Promise<string[]> => {
     let category = await knex(tables.categories).select(['id', 'parent_id']).where('id', categoryId)
@@ -17,10 +17,19 @@ const getCategoryId = async (categoryIds: any, categoryId: any): Promise<string[
     return categoryIds
 
 }
+
+/**
+* API Function for getting products by category and status from db
+@param req: request from client side
+@param res: res which will recieve on client side
+*/
+
 const getProductsByCategoryAndStatus = async (req: Request, res: Response) => {
     try {
         let { categoryId, status } = req.body
         let products: any = []
+        let fieldsToFetch = ['id', 'name', 'description', 'barcode', 'price', 'status']
+
         if (categoryId) {
             let category = await knex(tables.categories).select(['id', 'parent_id']).where('id', categoryId)
             let categoryIds = [category[0].id]
@@ -38,16 +47,16 @@ const getProductsByCategoryAndStatus = async (req: Request, res: Response) => {
             }
 
             if (!status) {
-                products = await knex(tables.products).select(['id', 'name', 'description', 'barcode', 'price', 'status'])
+                products = await knex(tables.products).select(fieldsToFetch)
                     .whereIn('id', modifiedProductIds)
             }
             else {
-                products = await knex(tables.products).select(['id', 'name', 'description', 'barcode', 'price', 'status'])
+                products = await knex(tables.products).select(fieldsToFetch)
                     .whereIn('id', modifiedProductIds).where('status', status)
             }
         }
         else if (!categoryId && status) {
-            products = await knex(tables.products).select(['id', 'name', 'description', 'barcode', 'price', 'status'])
+            products = await knex(tables.products).select(fieldsToFetch)
                 .where('status', status)
         }
         else {

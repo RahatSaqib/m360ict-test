@@ -6,7 +6,7 @@ import { processProducts, tables } from "../common/common";
 * API Function for Create Products
 @param req: request from client side
 @param res: res which will recieve on client side
-@param next: if I need to go throw any kind of function after processing business logic.
+
 */
 
 const createProductsApi = async (req: Request, res: Response) => {
@@ -17,15 +17,18 @@ const createProductsApi = async (req: Request, res: Response) => {
         if (!isExist.length)
             response = await knex(tables.products).insert(mainInfo);
         if (response) {
+
+            //Add Category Id to product-categories table
             for (let categoryId of categoryIds) {
-                let res = await knex(tables.productCategories).insert({
+                await knex(tables.productCategories).insert({
                     product_id: response[0],
                     category_id: categoryId
 
                 });
             }
 
-            let res = await knex(tables.attributes).insert({
+            //Add Attributes  to product-attrobutes table
+            await knex(tables.attributes).insert({
                 product_id: response[0],
                 size_id: attributes.sizeId,
                 color_id: attributes.colorId
@@ -44,15 +47,15 @@ const createProductsApi = async (req: Request, res: Response) => {
 * API Function for Read Products
 @param req: request from client side
 @param res: res which will recieve on client side
-@param next: if I need to go throw any kind of function after processing business logic.
 */
 
 const readProductsApi = async (req: Request, res: Response) => {
     const { id } = req.body;
     try {
-        let products = await knex(tables.products).select(['id', 'name', 'description', 'barcode', 'price', 'in_stock'])
+        let products = await knex(tables.products).select(['id', 'name', 'description', 'barcode', 'price', 'status'])
             .where('id', id)
 
+        //Process Products and add info from attributes and categories table
         products = await processProducts(products)
 
         res.status(200).json({
@@ -75,7 +78,7 @@ const readProductsApi = async (req: Request, res: Response) => {
 * API Function for Update Products
 @param req: request from client side
 @param res: res which will recieve on client side
-@param next: if I need to go throw any kind of function after processing business logic.
+
 */
 
 const updateProductsApi = async (req: Request, res: Response) => {
@@ -83,13 +86,18 @@ const updateProductsApi = async (req: Request, res: Response) => {
     let statusCode = 200
     let message = 'Successfully Updated Product.'
     try {
-        let isExist = await knex(tables.products).select('*').where('id', id)
-        if (isExist.length) {
-            const updateProduct = await knex(tables.products).where('id', id).update(values.mainInfo);
-            if (!updateProduct) {
-                statusCode = 404
-                message = 'Failed to find a product.'
+        let products = await knex(tables.products).select('*').where('id', id)
+        if (products.length) {
+
+            // If m
+            if (values.mainInfo) {
+                const updateProduct = await knex(tables.products).where('id', id).update({ ...products, ...values.mainInfo });
+                if (!updateProduct) {
+                    statusCode = 404
+                    message = 'Failed to find a product.'
+                }
             }
+
             if (values.categoryIds.length) {
                 await knex(tables.productCategories)
                     .where('product_id', id)
@@ -102,16 +110,19 @@ const updateProductsApi = async (req: Request, res: Response) => {
                     });
                 }
             }
+
             if (values.attributes) {
-                if (values.attributes.sizeId || values.attributes.sizeId == null) {
+                let attributes = await knex(tables.attributes).select('*').where('product_id', id)
+
+                if (typeof values.attributes.sizeId !== "undefined") {
                     values.attributes.size_id = values.attributes.sizeId
                     delete values.attributes.sizeId
                 }
-                if (values.attributes.colorId || values.attributes.colorId == null) {
+                if (typeof values.attributes.colorId !== "undefined") {
                     values.attributes.color_id = values.attributes.colorId
                     delete values.attributes.colorId
                 }
-                await knex(tables.attributes).update(values.attributes);
+                await knex(tables.attributes).update({ ...attributes[0], ...values.attributes });
             }
 
         }
@@ -132,7 +143,6 @@ const updateProductsApi = async (req: Request, res: Response) => {
 * API Function for Delete Categories
 @param req: request from client side
 @param res: res which will recieve on client side
-@param next: if I need to go throw any kind of function after processing business logic.
 */
 
 const deleteProductsApi = async (req: Request, res: Response) => {
@@ -141,9 +151,9 @@ const deleteProductsApi = async (req: Request, res: Response) => {
         await knex(tables.productCategories).where('product_id', id).del()
         await knex(tables.attributes).where('product_id', id).del()
         await knex(tables.products).where('id', id).del()
-        res.status(200).json({ message: 'Successfully deleted a category.' });
+        res.status(200).json({ message: 'Successfully deleted a product.' });
     } catch (error) {
-        res.status(500).json({ message: 'Failed to update a category.' });
+        res.status(500).json({ message: 'Failed to update a product.' });
     }
 
 }

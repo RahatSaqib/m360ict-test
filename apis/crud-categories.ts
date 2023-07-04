@@ -6,7 +6,7 @@ import { tables } from "../common/common";
 * API Function for Create categories
 @param req: request from client side
 @param res: res which will recieve on client side
-@param next: if I need to go throw any kind of function after processing business logic.
+
 */
 
 const createCategoriesApi = async (req: Request, res: Response) => {
@@ -27,7 +27,7 @@ const createCategoriesApi = async (req: Request, res: Response) => {
 * API Function for Read Categories
 @param req: request from client side
 @param res: res which will recieve on client side
-@param next: if I need to go throw any kind of function after processing business logic.
+
 */
 
 const readCategoriesApi = async (req: Request, res: Response) => {
@@ -56,7 +56,7 @@ const readCategoriesApi = async (req: Request, res: Response) => {
 * API Function for Update Categories
 @param req: request from client side
 @param res: res which will recieve on client side
-@param next: if I need to go throw any kind of function after processing business logic.
+
 */
 
 const updateCategoriesApi = async (req: Request, res: Response) => {
@@ -88,15 +88,15 @@ const updateCategoriesApi = async (req: Request, res: Response) => {
 * API Function for Delete Categories
 @param req: request from client side
 @param res: res which will recieve on client side
-@param next: if I need to go throw any kind of function after processing business logic.
+
 */
 
 const deleteCategoriesApi = async (req: Request, res: Response) => {
     const { id } = req.body;
     try {
-        let updateAttributes = await knex(tables.categories).where('category_id', id).update({ 'category_id': null })
-        if (updateAttributes) {
-            let response = await knex(tables.categories)
+        let deletedAttributes = await knex(tables.productCategories).where('category_id', id).del()
+        if (deletedAttributes) {
+            await knex(tables.categories)
                 .where('id', id)
                 .del()
         }
