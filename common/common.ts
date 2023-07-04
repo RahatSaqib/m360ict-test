@@ -1,6 +1,5 @@
 
-import fs from 'fs';
-import csv from "csv-parser";
+
 import { createAttributesTable, createCategoryTable, createColorTable, createProductCategoriesTable, createProductsTable, createSizeTable } from './db-tables';
 import knex from '../config/connectToDatabase';
 
@@ -13,36 +12,6 @@ export const tables: any = {
     colors: "colors",
     categories: "categories",
     productCategories: "product_categories",
-}
-
-/**
- * Function for wait process by specific time
- * @param ms : time you need to wait
- */
-
-export function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-/**
- * Function for reading file from csv
- * @param filepath : path of csv file
- */
-
-export const readFileFromCsv = async (filepath: string) => {
-    var csvData: any = [];
-    return new Promise((resolve, reject) => {
-        fs.createReadStream(filepath)
-            .pipe(csv())
-            .on('data', function (csvrow) {
-                //do something with csvrow
-                csvData.push(csvrow);
-            })
-            .on('end', function () {
-                //do something with csvData
-                resolve(csvData)
-            });
-    })
 }
 
 /**
