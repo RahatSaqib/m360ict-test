@@ -37,20 +37,20 @@ export const processProducts = async (products: any) => {
         for (let product of products) {
             let categoryIds = await knex(tables.productCategories).select(["category_id"]).where('product_id', product.id)
             for (let categoryId of categoryIds) {
-                let category = await knex(tables.categories).select(["name"]).where('id', categoryId.category_id)
+                let category = await knex(tables.categories).select(["name"]).where('id', categoryId.category_id).first()
                 if (!product.categories) product.categories = []
-                product.categories.push(category[0].name)
+                product.categories.push(category.name)
             }
 
 
-            let attributes = await knex(tables.attributes).select(["size_id", "color_id"]).where('product_id', product.id)
-            if (attributes[0].size_id) {
-                let sizeInfo = await knex(tables.sizes).select(["size_value"]).where('id', attributes[0].size_id)
-                product.size = sizeInfo[0].size_value
+            let attributes = await knex(tables.attributes).select(["size_id", "color_id"]).where('product_id', product.id).first()
+            if (attributes.size_id) {
+                let sizeInfo = await knex(tables.sizes).select(["size_value"]).where('id', attributes.size_id).first()
+                product.size = sizeInfo.size_value
             }
-            if (attributes[0].color_id) {
-                let colorInfo = await knex(tables.colors).select(["color_value"]).where('id', attributes[0].color_id)
-                product.color = colorInfo[0].color_value
+            if (attributes.color_id) {
+                let colorInfo = await knex(tables.colors).select(["color_value"]).where('id', attributes.color_id).first()
+                product.color = colorInfo.color_value
             }
         }
         return products

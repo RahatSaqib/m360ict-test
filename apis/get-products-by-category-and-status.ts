@@ -9,10 +9,10 @@ import { processProducts, tables } from "../common/common";
 
 */
 const getCategoryId = async (categoryIds: any, categoryId: any): Promise<string[]> => {
-    let category = await knex(tables.categories).select(['id', 'parent_id']).where('id', categoryId)
+    let category = await knex(tables.categories).select(['id', 'parent_id']).where('id', categoryId).first()
     categoryIds.push(categoryId)
-    if (category[0].parent_id && category[0].parent_id !== 'null') {
-        return await getCategoryId(categoryIds, category[0].parent_id)
+    if (category.parent_id && category.parent_id !== 'null') {
+        return await getCategoryId(categoryIds, category.parent_id)
     }
     return categoryIds
 
@@ -31,10 +31,10 @@ const getProductsByCategoryAndStatus = async (req: Request, res: Response) => {
         let fieldsToFetch = ['id', 'name', 'description', 'barcode', 'price', 'status']
 
         if (categoryId) {
-            let category = await knex(tables.categories).select(['id', 'parent_id']).where('id', categoryId)
-            let categoryIds = [category[0].id]
-            if (category[0].parent_id && category[0].parent_id !== 'null') {
-                categoryIds = await getCategoryId(categoryIds, category[0].parent_id)
+            let category = await knex(tables.categories).select(['id', 'parent_id']).where('id', categoryId).first()
+            let categoryIds = [category.id]
+            if (category.parent_id && category.parent_id !== 'null') {
+                categoryIds = await getCategoryId(categoryIds, category.parent_id)
             }
             categoryIds = [...new Set(categoryIds)]
             let productIds = await knex(tables.productCategories).select(['product_id']).whereIn('category_id', categoryIds)

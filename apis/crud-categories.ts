@@ -33,12 +33,12 @@ const createCategoriesApi = async (req: Request, res: Response) => {
 const readCategoriesApi = async (req: Request, res: Response) => {
     const { id } = req.body;
     try {
-        const category = await knex(tables.categories).select('*').where('id', id);
+        const category = await knex(tables.categories).select('*').where('id', id).first();
         if (category.length) {
-            const parentCategory = await knex(tables.categories).select('*').where('id', category[0].parent_id)
+            const parentCategory = await knex(tables.categories).select('*').where('id', category.parent_id).first()
             let response = {
-                ...category[0],
-                parent_category: parentCategory[0].name
+                ...category,
+                parent_category: parentCategory.name
             }
             res.status(200).json({ response });
         }

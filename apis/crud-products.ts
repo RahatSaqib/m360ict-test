@@ -112,7 +112,7 @@ const updateProductsApi = async (req: Request, res: Response) => {
             }
 
             if (values.attributes) {
-                let attributes = await knex(tables.attributes).select('*').where('product_id', id)
+                let attributes = await knex(tables.attributes).select('*').where('product_id', id).first()
 
                 if (typeof values.attributes.sizeId !== "undefined") {
                     values.attributes.size_id = values.attributes.sizeId
@@ -122,7 +122,7 @@ const updateProductsApi = async (req: Request, res: Response) => {
                     values.attributes.color_id = values.attributes.colorId
                     delete values.attributes.colorId
                 }
-                await knex(tables.attributes).update({ ...attributes[0], ...values.attributes });
+                await knex(tables.attributes).update({ ...attributes, ...values.attributes });
             }
 
         }
